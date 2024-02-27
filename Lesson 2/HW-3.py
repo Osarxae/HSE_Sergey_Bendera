@@ -34,40 +34,49 @@ def generate_header(data):
 
     # Выбираем суд на основании его названия
     courts = {
-        'Московский арбитражный суд': '1234567890',
-        'Санкт-Петербургский арбитражный суд': '1234567891',
-        'Кемеровский арбитражный суд': '1234567892',
-        'Ханты-Мансийский арбитражный суд': '1234567893',
-        'Новосибирский арбитражный суд': '1234567894',
+        '123': 'Московский арбитражный суд',
+        '456': 'Санкт-Петербургский арбитражный суд',
+        '789': 'Кемеровский арбитражный суд',
+        '012': 'Ханты-Мансийский арбитражный суд',
+        '345': 'Новосибирский арбитражный суд',
     }
-    court_code = courts[court_name]
+def generate_header(data):
+        # Получаем номер дела и адрес суда из данных
+        case_number = data['case_number']
+        court_name = courts[case_number[:3]]
 
-    # Получаем данные о суде из файла
-    import lesson_2_data
-    court_data = next(filter(lambda x: x['name'] == court_name, lesson_2_0_data.courts))
-    court_address = court_data['address']
+        # Получаем данные о суде из файла
+        import lesson_2_data
+        court_data = next(filter(lambda x: x['name'] == court_name, lesson_2_data.courts))
+        court_address = court_data['address']
 
-    # Создаем f-string для форматирования шапки
-    my_data = {
-        'name': 'Иванов Иван Иванович',
-        'inn': '1234567890',
-        'ogrnip': '123456789012345',
-        'address': '123456, г. Москва, ул. Лесная, 7',
-    }
-    opponent_data = data['opponent']
-    header = f'''
-В {court_name}
-Адрес: {court_address}
-Истец: {my_data['name']}
-ИНН {my_data['inn']} ОГРНИП {my_data['ogrnip']}
-Адрес: {my_data['address']}
-Ответчик: {opponent_data['name']}
-ИНН {opponent_data['inn']} ОГРН {opponent_data['ogrn']}
-Адрес: {opponent_data['address']}
-Номер дела {case_number}
-'''
+        # Получаем данные об истце из данных
+        plaintiff = data['plaintiff']
 
-    return header
+        # Получаем данные об ответчике из данных
+        opponent_data = data['respondent']
+
+        # Создаем f-string для форматирования шапки
+        my_data = {
+            'name': plaintiff['name'],
+            'inn': plaintiff['inn'],
+            'ogrnip': plaintiff['ogrnip'],
+            'address': plaintiff['address'],
+        }
+        header = f'''
+    В {court_name}
+    Адрес: {court_address}
+    Истец: {my_data['name']}
+    ИНН {my_data['inn']} ОГРНИП {my_data['ogrnip']}
+    Адрес: {my_data['address']}
+    Ответчик: {opponent_data['name']}
+    ИНН {opponent_data['inn']} ОГРН {opponent_data['ogrn']}
+    Адрес: {opponent_data['address']}
+    Номер дела {case_number}
+    '''
+
+        return header
+
 def task_2():
     plaintiff = {
         "name": "Бендера Сергей Николаевич",
