@@ -8,41 +8,43 @@ def factorial(n):
         return n * factorial(n-1)
 
 #Поиск наибольшего числа из трёх:
-def max_of_three(a, b, c):
-    return max(a, b, c)
+def func_2_max_number(*args) -> int | float:
+    max_ = 0
+    for i in args:
+        if i > max_:
+            max_ = i
+    return max_
+
 #Расчёт площади прямоугольного треугольника:
-def area_of_right_triangle(a, b):
-    return 0.5 * a * b
+def func_3_triangle_square(leg_1: int, leg_2: int) -> int | float:
+    return (leg_1 * leg_2) / 2
+def task_1():
+    a, b, c = 15, randint(1, 99), randint(1, 99)
+    print(f"Факториал числа a({a}) - {func_1_factorial(a)}")
+    print(f"Из чисел a = {a}, b = {b}, c = {c} самое большое - {func_2_max_number(a, b, c)}")
+    print(f"Из чисел a = {a}, b = {b}, c = {c} самое большое - {max((a, b, c))}")
+    print(f"Катет a = {a} см, катет b = {b} см, площадь треугольника равна - {func_3_triangle_square(a, b)}")
 
 #2 Создайте функцию для генерации текста с адресом суда.rts, respondents
-get_ipython().system('pip install requests')
-import requests, time
-def save_www_file(link):
-    filename = link.split('/')[-1]
-    req = requests.get(link, allow_redirects = True)
-    open(filename, "wb").write(req.content)
-    return
-link = 'https://raw.githubusercontent.com/sirotinsky/HSE_LegalPy/main/homeworks/lesson2/lesson_2_data.py'
-save_www_file(link)
-from lesson_2_data import courts, respondents
+
 def generate_header(data):
     # Получаем номер дела и адрес суда из данных
     case_number = data['case_number']
-    court_code = case_number[:3]
+    court_name = data['court_name']
 
-    # Выбираем суд на основании его кода
+    # Выбираем суд на основании его названия
     courts = {
-        'MO': 'Московский арбитражный суд',
-        'SP': 'Санкт-Петербургский арбитражный суд',
-        'KE': 'Кемеровский арбитражный суд',
-        'KH': 'Ханты-Мансийский арбитражный суд',
-        'NO': 'Новосибирский арбитражный суд',
+        'Московский арбитражный суд': '1234567890',
+        'Санкт-Петербургский арбитражный суд': '1234567891',
+        'Кемеровский арбитражный суд': '1234567892',
+        'Ханты-Мансийский арбитражный суд': '1234567893',
+        'Новосибирский арбитражный суд': '1234567894',
     }
-    court = courts[court_code]
+    court_code = courts[court_name]
 
     # Получаем данные о суде из файла
     import lesson_2_data
-    court_data = next(filter(lambda x: x['code'] == court_code, lesson_2_data.courts))
+    court_data = next(filter(lambda x: x['name'] == court_name, lesson_2_0_data.courts))
     court_address = court_data['address']
 
     # Создаем f-string для форматирования шапки
@@ -54,7 +56,7 @@ def generate_header(data):
     }
     opponent_data = data['opponent']
     header = f'''
-В {court}
+В {court_name}
 Адрес: {court_address}
 Истец: {my_data['name']}
 ИНН {my_data['inn']} ОГРНИП {my_data['ogrnip']}
@@ -66,8 +68,16 @@ def generate_header(data):
 '''
 
     return header
-def generate_headers(data_list):
-    for data in data_list:
-        header = generate_header(data)
-        print(header)
-
+def task_2():
+    plaintiff = {
+        "name": "Бендера Сергей Николаевич",
+        "inn": "1236182357",
+        "ogrnip": "218431927812733",
+        "address": "123534, г. Москва, Кремль, 1"
+    }
+    cleaned_respondents = [i for i in respondents if i.get("case_number")]
+    for respondent in cleaned_respondents:
+        court_code = respondent["case_number"].split("-")[0]
+        court = courts[court_code]
+        result = make_a_header(court, plaintiff, respondent)
+        print(result)
