@@ -1,45 +1,52 @@
-with open('traders.txt', 'r') as file:
-    inn_list = [line.strip() for line in file if line.strip()]
-    import json
-
-    with open('traders.json', 'r') as file:
-        traders_data = json.load(file)
-
-    traders_info = {}
-    for inn in inn_list:
-        for trader in traders_data:
-            if trader['inn'] == inn:
-                traders_info[inn] = {'ogrn': trader['ogrn'], 'address': trader['address']}
-                break
+import json
 import csv
-
-with open('traders.csv', 'w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerow(['inn', 'ogrn', 'address'])
-    for inn, info in traders_info.items():
-        writer.writerow([inn, info['ogrn'], info['address']])
-
 import re
-def find_emails(text):
-    email_pattern = r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b'
-    return re.findall(email_pattern, text)
-def find_all_emails(dataset):
-    email_dict = {}
-    for message in dataset:
-        emails = find_emails(message['msg_text'])
-        if emails:
-            publisher_inn = message['publisher_inn']
-            if publisher_inn not in email_dict:
-                email_dict[publisher_inn] = set()
-            email_dict[publisher_inn].update(emails)
-    return email_dict
+from ics import Calendar
+from datetime import datetime, timedelta
+import zoneinfo
+from collections import defaultdict
+import logging
 
-def save_emails_to_file(email_dict, filename):
-    with open(filename, 'w') as file:
-        json.dump(email_dict, file, ensure_ascii=False, indent=4)
+logging.basicConfig(level=logging.DEBUG)
 
-with open('dataset.json', 'r') as file:
-    dataset = json.load(file)
+zone = zoneinfo.ZoneInfo("Europe/Moscow")
+email_pattern = re.compile(r'\b[0-9a-zA-Z.-_]+@[0-9a-zA-Z.-_]+\.[a-zA-Z]+\b')
+inn_org_pattern = re.compile(r'\b\d{10}\b')
+inn_person_pattern = re.compile(r'\b\d{12}\b')
 
-email_dict = find_all_emails(dataset)
-save_emails_to_file(email_dict, 'emails.json')
+
+def parse_into_csv() -> None:
+    with open("traders.txt", "r") as file:
+        inn_data = [i.rstrip() for i in file.readlines()]
+    with open("traders.json", "r") as file:
+        trader_data_array = json.load(file)
+    traders = []
+    for trader in trader_data_array:
+        if trader['inn'] in inn_data:
+            traders.append(trader)
+    with open('traders.csv', 'w', newline='') as file:
+        writer = csv.writer(file, delimiter=';')
+        writer.writerow(['INN', 'OGRN', 'ADDRESS'])
+        for i in traders:
+            writer.writerow([f"{i['inn']}", f"{i['ogrn']}", f"{i['address']}"])
+
+
+def find_email_addresses():
+    with open("1000_efrsb_messages.json", "r") as file:
+        bankrupt_data = json.load(file)
+    results = defaultdict(list)
+    for row in bankrupt_data:
+        try:
+            email_data_array = re.findall(email_pattern, row['msg_text'])
+            for email in email_data_array:
+                email = email.lower()
+                results[row['publisher_inn']].append(email)
+        except Exception as e:
+            logging.exception(f"Error processing row {row}: {e}")
+
+    with open('email_data_array.json', "w") as file:
+        json.dump(results, file)
+
+if __name__ == '__main__':
+    parse_into_csv()
+    find_email_addresses()
