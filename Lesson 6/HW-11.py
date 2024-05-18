@@ -1,7 +1,11 @@
 import requests
 import json
+from typing import Dict
+
 
 class LegalAPI:
+    BASE_URL = "https://api.sirotinsky.com"
+
     def __init__(self, token: str):
         self.token = token
         self.headers = {
@@ -9,61 +13,33 @@ class LegalAPI:
             "Content-Type": "application/json"
         }
 
-    def get_data_from_efrsb(self, efrsb_id: int) -> dict:
-        """
-        Метод для получения данных из ЕФРСБ по идентификатору.
-
-        :param efrsb_id: Идентификатор ЕФРСБ
-        :return: Данные в формате JSON
-        """
-        url = f"https://legal-api.sirotinsky.com/api/v1/efrsb/{efrsb_id}"
+    def _get(self, endpoint: str, id: str) -> Dict:
+        url = f"{self.BASE_URL}/{endpoint}/{id}"
         response = requests.get(url, headers=self.headers)
+        response.raise_for_status()
+        return response.json()
 
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception(f"Error getting data from EFRSB: {response.status_code}")
+    def get_organisation(self, efrsb_id: int) -> Dict:
+        return self._get("efrsb/organisation", str(efrsb_id))
 
-    def get_data_from_efrsb_by_inn(self, inn: str) -> dict:
-        """
-        Метод для получения данных из ЕФРСБ по ИНН.
+    def get_person(self, inn: str) -> Dict:
+        return self._get("efrsb/person", inn)
 
-        :param inn: ИНН
-        :return: Данные в формате JSON
-        """
-        url = f"https://legal-api.sirotinsky.com/api/v1/efrsb/inn/{inn}"
-        response = requests.get(url, headers=self.headers)
+    def get_trader(self, ogrn: str) -> Dict:
+        return self._get("efrsb/trader", ogrn)
 
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception(f"Error getting data from EFRSB: {response.status_code}")
 
-    def get_data_from_efrsb_by_ogrn(self, ogrn: str) -> dict:
-        """
-        Метод для получения данных из ЕФРСБ по ОГРН.
+if __name__ == "__main__":
+    api = LegalAPI('4123saedfasedfsadf4324234f223ddf23')
 
-        :param ogrn: ОГРН
-        :return: Данные в формате JSON
-        """
-        url = f"https://legal-api.sirotinsky.com/api/v1/efrsb/ogrn/{ogrn}"
-        response = requests.get(url, headers=self.headers)
+    organisation_id = 123456  # Замените на правильный идентификатор ЕФРСБ
+    data = api.get_organisation(organisation_id)
+    print(json.dumps(data, indent=4))
 
-        if response.status_code == 200:
-            return response.json()
-        else:
-            raise Exception(f"Error getting data from EFRSB: {response.status_code}")
+    inn = '1234567890'  # Замените на правильный ИНН
+    data = api.get_person(inn)
+    print(json.dumps(data, indent=4))
 
-api = LegalAPI('4123saedfasedfsadf4324234f223ddf23')
-
-efrsb_id = 123456  # Замените на правильный идентификатор ЕФРСБ
-data = api.get_data_from_efrsb(efrsb_id)
-print(json.dumps(data, indent=4))
-
-inn = '1234567890'  # Замените на правильный ИНН
-data = api.get_data_from_efrsb_by_inn(inn)
-print(json.dumps(data, indent=4))
-
-ogrn = '1234567890123'  # Замените на правильный ОГРН
-data = api.get_data_from_efrsb_by_ogrn(ogrn)
-print(json.dumps(data, indent=4))
+    ogrn = '1234567890123'  # Замените на правильный ОГРН
+    data = api.get_trader(ogrn)
+    print(json.dumps(data, indent=4))
