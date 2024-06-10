@@ -7,6 +7,7 @@ from collections import defaultdict
 # Константа для часового пояса Москвы
 TZ_MOSCOW = zoneinfo.ZoneInfo("Europe/Moscow")
 
+
 def read_inn_set(filename: str) -> set:
     """Чтение ИНН из файла и возврат их в виде множества."""
     with open(filename, "r") as f:
@@ -64,9 +65,3 @@ def execute_pipeline() -> None:
 
 if __name__ == '__main__':
     execute_pipeline()
-
-
-
-
-
-
