@@ -4,7 +4,7 @@ import re
 import zoneinfo
 from collections import defaultdict
 
-# Константа для часового пояса Москвы
+
 TZ_MOSCOW = zoneinfo.ZoneInfo("Europe/Moscow")
 
 
