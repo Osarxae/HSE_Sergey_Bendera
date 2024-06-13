@@ -2,7 +2,6 @@ import logging
 from telegram import Update, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-
 logging.basicConfig(
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
     level=logging.INFO
@@ -62,8 +61,8 @@ def handle_sub_menu(update: Update, context: CallbackContext) -> None:
     else:
         update.message.reply_text('Пожалуйста, выберите опцию из подменю.', reply_markup=sub_menu_keyboard())
 
-def main() -> None:
 
+def main() -> None:
     updater = Updater("токен")
 
     dispatcher = updater.dispatcher
@@ -74,6 +73,7 @@ def main() -> None:
 
     updater.start_polling()
     updater.idle()
+
 
 if __name__ == '__main__':
     main()
