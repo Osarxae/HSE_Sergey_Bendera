@@ -13,7 +13,7 @@ def start(update: Update, context: CallbackContext) -> None:
     user = update.effective_user
     update.message.reply_text(
         f'Привет, {user.first_name}!\n'
-        'Я ваш справочник-бот. Пожалуйста, выберите раздел:',
+        'Я Ваш справочник-бот. Пожалуйста, выберите раздел:',
         reply_markup=main_menu_keyboard()
     )
 
