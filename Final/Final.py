@@ -126,26 +126,6 @@ def main():
     pickle_path = folder_path / '2024' / 'data_2024.pkl'
     parser.load_from_csv(csv_path)
     parser.load_from_pickle(pickle_path)
-    manager = DataManager(parser.data)
-
-    print("Latest data entry:")
-    print(manager.get_latest())
-
-    example_date = '2024-05-10'
-    print(f"\nData for {example_date}:")
-    print(manager.get_by_date(example_date))
-
-    column_name = 'Международные резервы'
-    try:
-        print(f"\nAverage value for column '{column_name}':")
-        print(manager.get_average(column_name))
-    except KeyError as e:
-        print(e)
-
-    start_date = '2023-01-01'
-    end_date = '2023-12-31'
-    print(f"\nData range from {start_date} to {end_date}:")
-    print(manager.get_data_range(start_date, end_date))
 
 
 if __name__ == "__main__":
