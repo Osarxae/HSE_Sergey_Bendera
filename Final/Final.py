@@ -36,7 +36,7 @@ class ParserCBRF:
         try:
             df['Дата'] = pd.to_datetime(df['Дата'], format='%d.%m.%Y')
         except ValueError:
-            df['Дата'] = pd.to_datetime(df['Дата'])  # Попытка автоопределения формата даты
+            df['Дата'] = pd.to_datetime(df['Дата'])
 
         for col in df.columns[1:]:
             df[col] = df[col].apply(lambda x: decimal.Decimal(str(x).replace(',', '.')) if pd.notnull(x) else None)
@@ -70,12 +70,12 @@ class ParserCBRF:
         """Загрузка данных из Pickle-файла"""
         with open(filepath, 'rb') as f:
             self.data = pickle.load(f)
-        self.data = self.process_data(self.data)  # Применить обработку данных после загрузки
+        self.data = self.process_data(self.data)
 
     def load_from_csv(self, filepath):
         """Загрузка данных из CSV-файла"""
         self.data = pd.read_csv(filepath)
-        self.data = self.process_data(self.data)  # Применить обработку данных после загрузки
+        self.data = self.process_data(self.data)
 
     @staticmethod
     def default(obj):
