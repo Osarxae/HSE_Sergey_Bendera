@@ -27,10 +27,14 @@ class ParserCBRF:
         response.raise_for_status()
         soup = BeautifulSoup(response.content, 'html.parser')
         table = soup.find('table', {'class': 'data'})
-        df = pd.read_html(StringIO(str(table)))[0]
-        self.data = self.process_data(df)
+        if table:
+            df = pd.read_html(StringIO(str(table)))[0]
+            self.data = self.process_data(df)
+        else:
+            raise ValueError("Таблица данных не найдена на веб-странице")
 
-    def process_data(self, df):
+    @staticmethod
+    def process_data(df):
         """Обработка данных"""
         df.columns = [col.strip() for col in df.columns]
         try:
@@ -50,6 +54,8 @@ class ParserCBRF:
                 year_folder = folder_path / str(year)
                 year_folder.mkdir(parents=True, exist_ok=True)
                 self.save_to_formats(group, year_folder, year)
+        else:
+            raise ValueError("Нет данных для сохранения")
 
     def save_to_formats(self, data, folder, year):
         """Сохранение данных в разные форматы"""
@@ -59,9 +65,17 @@ class ParserCBRF:
 
         data.to_csv(csv_path, index=False)
 
+        # Преобразуем столбцы в строки и приведем даты к ISO формату
+        data['Дата'] = data['Дата'].dt.strftime('%Y-%m-%d')
+
+        # Преобразуем значения типа decimal.Decimal в строки
+        data['Объем'] = data['Объем'].astype(str)
+
         data_dict = data.to_dict(orient='records')
-        with open(json_path, 'w') as f:
-            json.dump(data_dict, f, default=self.default)
+
+        # Сохраняем в JSON с красивым форматированием и без экранирования Unicode
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(data_dict, f, indent=4, ensure_ascii=False)
 
         with open(pickle_path, 'wb') as f:
             pickle.dump(data, f)
@@ -86,6 +100,7 @@ class ParserCBRF:
     def start(self):
         self.fetch_and_parse_html()
         folder_path = Path(__file__).parent / 'parsed_data'
+        folder_path.mkdir(parents=True, exist_ok=True)
         self.save_grouped_by_year(folder_path)
 
 
@@ -126,6 +141,13 @@ def main():
     pickle_path = folder_path / '2024' / 'data_2024.pkl'
     parser.load_from_csv(csv_path)
     parser.load_from_pickle(pickle_path)
+
+    print("Колонки данных:", parser.data.columns)
+
+    data_manager = DataManager(parser.data)
+    print(data_manager.get_latest())
+    print(data_manager.get_by_date('2024-01-05'))
+    print(data_manager.get_average('Объем'))
 
 
 if __name__ == "__main__":
