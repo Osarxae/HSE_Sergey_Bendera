@@ -114,8 +114,8 @@ class DataManager:
 
     def get_data_range(self, start_date, end_date):
         """Получение данных за диапазон дат"""
-        start_date = pd.to_datetime(start_date)
-        end_date = pd.to_datetime(end_date)
+        start_date = pd.to_datetime(start_date, dayfirst=True)
+        end_date = pd.to_datetime(end_date, dayfirst=True)
         mask = (self.data['Дата'] >= start_date) & (self.data['Дата'] <= end_date)
         return self.data.loc[mask]
 
@@ -129,6 +129,16 @@ def main():
     pickle_path = folder_path / '2024' / 'data_2024.pkl'
     parser.load_from_csv(csv_path)
     parser.load_from_pickle(pickle_path)
+
+    data_manager = DataManager(parser.data)
+
+    latest_data = data_manager.get_latest()
+    print("Последние данные: Дата =", latest_data['Дата'], "Объем =", latest_data['Объем'])
+    print("Среднее значение по колонке 'Объем':", data_manager.get_average('Объем'))
+    print("Данные за период с 01.01.2024 по 31.12.2024:")
+    print(data_manager.get_data_range('01.01.2024', '31.12.2024').to_string(index=False))
+    print("Данные по конкретной дате (например, 05.01.2024):")
+    print(data_manager.get_by_date('2024-01-05').to_string(index=False))
 
 
 if __name__ == "__main__":
