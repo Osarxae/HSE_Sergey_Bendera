@@ -60,10 +60,9 @@ class ParserCBRF:
         pickle_path = folder / f'data_{year}.pkl'
 
         data.to_csv(csv_path, index=False)
-
         data['Дата'] = data['Дата'].dt.strftime('%Y-%m-%d')
-
         data_dict = data.to_dict(orient='records')
+
         with open(json_path, 'w', encoding='utf-8') as f:
             json.dump(data_dict, f, indent=4, ensure_ascii=False, default=ParserCBRF.default)
 
