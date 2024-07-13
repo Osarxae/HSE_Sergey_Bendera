@@ -40,7 +40,9 @@ class ParserCBRF:
             df['Дата'] = pd.to_datetime(df['Дата'])
 
         for col in df.columns[1:]:
-            df[col] = df[col].apply(lambda x: decimal.Decimal(str(x).replace(',', '.')) if pd.notnull(x) else None)
+            df[col] = df[col].apply(
+                lambda x: decimal.Decimal(str(x).replace(',', '.')) if pd.notnull(x) else None
+            )
         return df
 
     def save_grouped_by_year(self, folder_path):
