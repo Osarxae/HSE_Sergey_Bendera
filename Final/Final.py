@@ -71,16 +71,24 @@ class ParserCBRF:
         with open(pickle_path, 'wb') as f:
             pickle.dump(data, f)
 
-    def load_from_pickle(self, filepath):
-        """Загрузка данных из Pickle-файла"""
-        with open(filepath, 'rb') as f:
-            self.data = pickle.load(f)
-        self.data = self.process_data(self.data)
+    def load_all_data(self, folder_path):
+        """Загрузка данных из всех файлов в указанной папке"""
+        all_files = folder_path.glob('**/*.[cp][sv]*')
+        data_frames = []
 
-    def load_from_csv(self, filepath):
-        """Загрузка данных из CSV-файла"""
-        self.data = pd.read_csv(filepath)
-        self.data = self.process_data(self.data)
+        for file in all_files:
+            if file.suffix == '.csv':
+                df = pd.read_csv(file)
+                df = self.process_data(df)
+                data_frames.append(df)
+            elif file.suffix == '.pkl':
+                with open(file, 'rb') as f:
+                    df = pickle.load(f)
+                    df = self.process_data(df)
+                    data_frames.append(df)
+
+        if data_frames:
+            self.data = pd.concat(data_frames).drop_duplicates().reset_index(drop=True)
 
     @staticmethod
     def default(obj):
@@ -127,20 +135,27 @@ def main():
     parser.start()
 
     folder_path = Path(__file__).parent / 'parsed_data'
-    csv_path = folder_path / '2024' / 'data_2024.csv'
-    pickle_path = folder_path / '2024' / 'data_2024.pkl'
-    parser.load_from_csv(csv_path)
-    parser.load_from_pickle(pickle_path)
+    parser.load_all_data(folder_path)
 
     data_manager = DataManager(parser.data)
 
     latest_data = data_manager.get_latest()
     print("Последние данные: Дата =", latest_data['Дата'], "Объем =", latest_data['Объем'])
     print("Среднее значение по колонке 'Объем':", data_manager.get_average('Объем'))
-    print("Данные за период с 01.01.2024 по 31.12.2024:")
-    print(data_manager.get_data_range('01.01.2024', '31.12.2024').to_string(index=False))
+
+    print("Данные за период с 01.01.2020 по 31.12.2024:")
+    data_2020_to_2024 = data_manager.get_data_range('01.01.2020', '31.12.2024')
+    if data_2020_to_2024.empty:
+        print("Нет данных для указанного периода.")
+    else:
+        print(data_2020_to_2024.to_string(index=False))
+
     print("Данные по конкретной дате (например, 05.01.2024):")
-    print(data_manager.get_by_date('2024-01-05').to_string(index=False))
+    specific_date_data = data_manager.get_by_date('2024-01-05')
+    if specific_date_data.empty:
+        print("Нет данных для указанной даты.")
+    else:
+        print(specific_date_data.to_string(index=False))
 
 
 if __name__ == "__main__":
