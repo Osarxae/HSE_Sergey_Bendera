@@ -131,19 +131,27 @@ class DataManager:
 
 
 def main():
+    # Создание экземпляра парсера и запуск процесса парсинга данных
     parser = ParserCBRF()
     parser.start()
 
+    # Определение пути к папке с сохраненными данными
     folder_path = Path(__file__).parent / 'parsed_data'
+
+    # Загрузка всех данных из указанной папки
     parser.load_all_data(folder_path)
 
+    # Создание экземпляра DataManager для работы с загруженными данными
     data_manager = DataManager(parser.data)
-    latest_data = data_manager.get_latest()
 
+    # Получение последних данных
+    latest_data = data_manager.get_latest()
     print("Последние данные: Дата =", latest_data['Дата'], "Объем =", latest_data['Объем'])
 
+    # Вычисление и вывод среднего значения по колонке 'Объем'
     print("Среднее значение по колонке 'Объем':", data_manager.get_average('Объем'))
 
+    # Получение и вывод данных за период с 01.01.2020 по 31.12.2024
     print("Данные за период с 01.01.2020 по 31.12.2024:")
     data_2020_to_2024 = data_manager.get_data_range('01.01.2020', '31.12.2024')
     if data_2020_to_2024.empty:
@@ -151,6 +159,7 @@ def main():
     else:
         print(data_2020_to_2024.to_string(index=False))
 
+    # Получение и вывод данных по конкретной дате (например, 05.01.2024)
     print("Данные по конкретной дате (например, 05.01.2024):")
     specific_date_data = data_manager.get_by_date('2024-01-05')
     if specific_date_data.empty:
