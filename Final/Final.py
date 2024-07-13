@@ -138,9 +138,10 @@ def main():
     parser.load_all_data(folder_path)
 
     data_manager = DataManager(parser.data)
-
     latest_data = data_manager.get_latest()
+
     print("Последние данные: Дата =", latest_data['Дата'], "Объем =", latest_data['Объем'])
+
     print("Среднее значение по колонке 'Объем':", data_manager.get_average('Объем'))
 
     print("Данные за период с 01.01.2020 по 31.12.2024:")
